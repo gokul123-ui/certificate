@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Credential Platform | Verification & Billing</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon">🛡️</div>
+                <div class="brand-text">
+                    <h2>DigiVerify</h2>
+                    <span>Credential & Billing</span>
+                </div>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-tab="tab-institution">
+                    <span class="icon">🏛️</span> Institutions
+                </button>
+                <button class="nav-btn" data-tab="tab-issue">
+                    <span class="icon">📜</span> Issue Certificate
+                </button>
+                <button class="nav-btn" data-tab="tab-verify">
+                    <span class="icon">🔍</span> Verify Certificate
+                </button>
+                <button class="nav-btn" data-tab="tab-billing">
+                    <span class="icon">💳</span> Billing & Payments
+                </button>
+                <button class="nav-btn" data-tab="tab-reports">
+                    <span class="icon">📊</span> Reports & P&L
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header Bar -->
+            <header class="top-header">
+                <div class="header-titles">
+                    <h1>Digital Credential Platform</h1>
+                    <p class="subtitle">Certificate Verification & Billing System</p>
+                </div>
+                <div class="header-badge">
+                    <span class="status-dot"></span> System Ready
+                </div>
+            </header>
+
+            <!-- Global Toast / Alert Message Area -->
+            <div id="toast" class="toast hidden"></div>
+
+            <!-- Tab 1: Institution Management -->
+            <section id="tab-institution" class="tab-page active">
+                <div class="grid-2">
+                    <!-- Form Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Register Institution</h3>
+                            <p>Add a new university or organization to the platform</p>
+                        </div>
+                        <form id="institutionForm" onsubmit="registerInstitution(event)">
+                            <div class="form-group">
+                                <label for="instName">Institution Name *</label>
+                                <input type="text" id="instName" placeholder="e.g. ABC Engineering College" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="instEmail">Email Address *</label>
+                                <input type="email" id="instEmail" placeholder="e.g. contact@abc.edu" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="instAddress">Address</label>
+                                <input type="text" id="instAddress" placeholder="e.g. Chennai, Tamil Nadu">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Register Institution</button>
+                        </form>
+                        <div id="instResult" class="result-box hidden"></div>
+                    </div>
+
+                    <!-- Institution List Card -->
+                    <div class="card">
+                        <div class="card-header flex-between">
+                            <div>
+                                <h3>Registered Institutions</h3>
+                                <p>Institutions available for issuing certificates</p>
+                            </div>
+                            <button class="btn btn-sm btn-outline" onclick="loadInstitutions()">Refresh</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Address</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="institutionTableBody">
+                                    <tr><td colspan="4" class="text-center">Loading...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 2: Issue Certificate -->
+            <section id="tab-issue" class="tab-page">
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Issue Digital Certificate</h3>
+                            <p>Generate a tamper-proof SHA-256 hashed certificate</p>
+                        </div>
+                        <form id="issueForm" onsubmit="issueCertificate(event)">
+                            <div class="form-group">
+                                <label for="studentName">Student Name *</label>
+                                <input type="text" id="studentName" placeholder="e.g. Gokul" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="course">Course Name *</label>
+                                <input type="text" id="course" placeholder="e.g. B.Tech Information Technology" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="issueInstId">Institution *</label>
+                                <select id="issueInstId" required>
+                                    <option value="">Select Institution</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Issue Certificate</button>
+                        </form>
+                    </div>
+
+                    <!-- Issued Certificate Output Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Generated Certificate Details</h3>
+                            <p>Resulting cryptographic hash & credential details</p>
+                        </div>
+                        <div id="issueResultPlaceholder" class="empty-state">
+                            <span>📜</span>
+                            <p>Fill out the form to issue a new certificate.</p>
+                        </div>
+                        <div id="issueResult" class="result-card hidden">
+                            <div class="cert-header">
+                                <span class="badge badge-success">Generated Successfully</span>
+                                <span id="resCertId" class="cert-id-tag">CERT-1001</span>
+                            </div>
+                            <div class="cert-body">
+                                <div class="detail-row">
+                                    <span class="label">Student Name:</span>
+                                    <span id="resStudent" class="value font-bold"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Course:</span>
+                                    <span id="resCourse" class="value"></span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Issued Date:</span>
+                                    <span id="resIssuedDate" class="value"></span>
+                                </div>
+                                <div class="hash-box">
+                                    <span class="label">SHA-256 Hash Signature:</span>
+                                    <div class="hash-content">
+                                        <code id="resHash"></code>
+                                        <button class="btn-copy" onclick="copyHash()">Copy Hash</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 3: Verify Certificate -->
+            <section id="tab-verify" class="tab-page">
+                <div class="card max-w-700 mx-auto">
+                    <div class="card-header text-center">
+                        <h3>Verify Certificate Credential</h3>
+                        <p>Paste the SHA-256 hash below to validate certificate authenticity</p>
+                    </div>
+                    <form id="verifyForm" onsubmit="verifyCertificate(event)" class="verify-form">
+                        <div class="form-group">
+                            <input type="text" id="verifyHash" placeholder="Enter or paste SHA-256 certificate hash..." required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Verify Certificate</button>
+                    </form>
+
+                    <!-- Verification Result Display -->
+                    <div id="verifyResult" class="verify-result-box hidden"></div>
+                </div>
+            </section>
+
+            <!-- Tab 4: Billing & Payments -->
+            <section id="tab-billing" class="tab-page">
+                <div class="grid-2">
+                    <!-- Create Invoice Form -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Create Invoice</h3>
+                            <p>Generate billing invoice for API queries or credentials</p>
+                        </div>
+                        <form id="invoiceForm" onsubmit="createInvoice(event)">
+                            <div class="form-group">
+                                <label for="invInstId">Institution *</label>
+                                <select id="invInstId" required>
+                                    <option value="">Select Institution</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="packageName">Package Name *</label>
+                                <input type="text" id="packageName" placeholder="e.g. 100 API Queries" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="amount">Amount ($) *</label>
+                                <input type="number" id="amount" step="0.01" min="1" placeholder="e.g. 500" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create Invoice</button>
+                        </form>
+                        <div id="invoiceResult" class="result-box hidden"></div>
+                    </div>
+
+                    <!-- Payment Form -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Make Payment</h3>
+                            <p>Simulate instant settlement via Bank Payment</p>
+                        </div>
+                        <form id="paymentForm" onsubmit="makePayment(event)">
+                            <div class="form-group">
+                                <label for="payInvoiceId">Select Pending Invoice *</label>
+                                <select id="payInvoiceId" required>
+                                    <option value="">Select Invoice</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="paymentMethod">Payment Method</label>
+                                <select id="paymentMethod">
+                                    <option value="BANK" selected>BANK (Simulated Bank Transfer)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success">Pay Invoice</button>
+                        </form>
+                        <div id="paymentResult" class="result-box hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Invoice & Payment History Table -->
+                <div class="card mt-20">
+                    <div class="card-header flex-between">
+                        <div>
+                            <h3>Invoices & Settlement Log</h3>
+                            <p>Overview of all generated invoices and their current status</p>
+                        </div>
+                        <button class="btn btn-sm btn-outline" onclick="loadInvoices()">Refresh Log</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Invoice ID</th>
+                                    <th>Inst. ID</th>
+                                    <th>Package</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoiceTableBody">
+                                <tr><td colspan="6" class="text-center">Loading invoices...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tab 5: Reports & P&L -->
+            <section id="tab-reports" class="tab-page">
+                <div class="flex-between mb-20">
+                    <div>
+                        <h2>Platform Financial Performance</h2>
+                        <p class="subtitle">Live analytics for revenue, settlements, and unit budgets</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="loadReports()">🔄 Refresh Reports</button>
+                </div>
+
+                <div class="grid-2">
+                    <!-- Platform P&L Card -->
+                    <div class="card report-card pl-card">
+                        <div class="card-header">
+                            <span class="report-tag">P&L SUMMARY</span>
+                            <h3>Platform P&L</h3>
+                        </div>
+                        <div class="metrics-grid">
+                            <div class="metric">
+                                <span class="metric-label">Total Revenue (Paid Invoices)</span>
+                                <span id="plRevenue" class="metric-value text-green">$0.00</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Total Settlements Received</span>
+                                <span id="plPayments" class="metric-value text-blue">$0.00</span>
+                            </div>
+                            <div class="metric metric-total">
+                                <span class="metric-label">Platform Net Profit</span>
+                                <span id="plProfit" class="metric-value text-purple">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Unit Budget Report Card -->
+                    <div class="card report-card budget-card">
+                        <div class="card-header">
+                            <span class="report-tag">UNIT BUDGET</span>
+                            <h3>Unit Budget Allocation</h3>
+                        </div>
+                        <div class="metrics-grid">
+                            <div class="metric">
+                                <span class="metric-label">Certificate Verification</span>
+                                <span id="budCert" class="metric-value">$0.00</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">API Billing Services</span>
+                                <span id="budApi" class="metric-value">$0.00</span>
+                            </div>
+                            <div class="metric metric-total">
+                                <span class="metric-label">Total Revenue Pool</span>
+                                <span id="budTotal" class="metric-value text-primary">$0.00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
